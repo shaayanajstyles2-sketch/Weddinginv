@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Anoof & Shifa — Wedding Invitation</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f8f5f0;--white:#ffffff;--dark:#1a1814;
+  --gold:#b89a6a;--gold-light:#d4b896;--mid:#6b6560;--light:#e8e2d9;
+}
+body{
+  background:var(--cream);
+  font-family:'Jost',sans-serif;font-weight:300;color:var(--dark);
+  min-height:100vh;overflow-x:hidden;
+}
+#petals-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;}
+#envelope-screen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--cream);
+  transition:opacity 0.8s ease, visibility 0.8s ease;
+}
+#envelope-screen.gone{opacity:0;visibility:hidden;pointer-events:none;}
+.envelope{
+  width:min(380px,90vw);cursor:pointer;
+  filter:drop-shadow(0 12px 40px rgba(0,0,0,0.12));
+  animation:floatEnv 3s ease-in-out infinite;
+}
+@keyframes floatEnv{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.env-flap{fill:#f0ebe3;stroke:#e8e2d9;stroke-width:1;transform-origin:center 60px;transition:transform 0.6s ease;}
+.envelope:hover .env-flap{transform:rotateX(-160deg);}
+.open-hint{
+  margin-top:24px;text-align:center;
+  font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:0.4}50%{opacity:1}}
+#invite{
+  position:relative;z-index:1;
+  display:flex;align-items:flex-start;justify-content:center;
+  min-height:100vh;padding:40px 20px;
+  opacity:0;transform:scale(0.94);
+  transition:opacity 0.8s ease 0.2s,transform 0.8s ease 0.2s;
+}
+#invite.visible{opacity:1;transform:scale(1);}
+.card{
+  background:#fff;max-width:540px;width:100%;
+  position:relative;
+  box-shadow:0 8px 80px rgba(0,0,0,0.1);
+}
+.card::before{content:'';display:block;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.corner{position:absolute;width:30px;height:30px;border-color:var(--gold);border-style:solid;opacity:0.4;}
+.corner.tl{top:20px;left:20px;border-width:1px 0 0 1px;}
+.corner.tr{top:20px;right:20px;border-width:1px 1px 0 0;}
+.corner.bl{bottom:20px;left:20px;border-width:0 0 1px 1px;}
+.corner.br{bottom:20px;right:20px;border-width:0 1px 1px 0;}
+.tabs{display:flex;border-bottom:1px solid var(--light);}
+.tab{
+  flex:1;padding:14px 6px;
+  font-size:8px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--mid);cursor:pointer;text-align:center;
+  border:none;background:transparent;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:all 0.25s;font-family:'Jost',sans-serif;font-weight:300;
+}
+.tab:hover{color:var(--dark);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.panel{display:none;padding:48px 44px 44px;animation:panelIn 0.4s ease both;}
+.panel.active{display:block;}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.tagline{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:28px;}
+.names{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(44px,10vw,60px);font-weight:300;line-height:1;
+  text-align:center;color:var(--dark);
+}
+.names .amp{font-style:italic;color:var(--gold);font-size:0.82em;display:block;margin:6px 0;}
+.divider{display:flex;align-items:center;gap:16px;margin:30px 0;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--light);}
+.divider-gem{width:8px;height:8px;background:var(--gold);transform:rotate(45deg);}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:28px 20px;margin-bottom:32px;}
+.detail-block{text-align:center;}
+.detail-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.detail-value{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:400;color:var(--dark);line-height:1.3;}
+.detail-sub{font-size:11px;color:var(--mid);margin-top:3px;letter-spacing:0.5px;}
+.countdown-wrap{background:var(--cream);padding:22px;text-align:center;}
+.countdown-title{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.countdown{display:flex;justify-content:center;gap:20px;}
+.count-unit{text-align:center;}
+.count-num{
+  font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--dark);line-height:1;
+  transition:transform 0.15s ease;
+}
+.count-num.bump{transform:scale(1.15);}
+.count-label{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-top:4px;}
+.schedule-list{list-style:none;display:flex;flex-direction:column;}
+.schedule-item{
+  display:flex;align-items:flex-start;gap:18px;
+  padding:18px 0;border-bottom:1px solid var(--light);cursor:pointer;
+}
+.schedule-item:last-child{border-bottom:none;}
+.s-time{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold);min-width:50px;text-align:right;padding-top:2px;}
+.s-dot{width:10px;height:10px;border-radius:50%;border:1px solid var(--gold);margin-top:5px;flex-shrink:0;transition:background 0.3s;}
+.schedule-item:hover .s-dot,.schedule-item.open .s-dot{background:var(--gold);}
+.s-body{flex:1;}
+.s-title{font-size:14px;font-weight:300;letter-spacing:0.5px;color:var(--dark);}
+.s-desc{
+  font-size:12px;color:var(--mid);margin-top:6px;line-height:1.65;
+  max-height:0;overflow:hidden;transition:max-height 0.4s ease,opacity 0.3s;opacity:0;
+}
+.schedule-item.open .s-desc{max-height:100px;opacity:1;}
+.map-box{
+  width:100%;height:190px;background:var(--cream);
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--light);margin-bottom:22px;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.map-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(var(--light) 1px,transparent 1px),linear-gradient(90deg,var(--light) 1px,transparent 1px);
+  background-size:28px 28px;opacity:0.7;
+}
+.map-pin{position:relative;z-index:1;text-align:center;animation:pinBounce 1.6s ease-in-out infinite;}
+@keyframes pinBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.map-pin-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-top:6px;}
+.venue-card{padding:18px;background:var(--cream);margin-bottom:14px;}
+.venue-name{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--dark);margin-bottom:4px;}
+.venue-addr{font-size:12px;color:var(--mid);line-height:1.7;letter-spacing:0.5px;}
+.map-btn{
+  display:block;width:100%;padding:13px;
+  background:transparent;border:1px solid var(--dark);
+  font-family:'Jost',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--dark);cursor:pointer;text-align:center;text-decoration:none;
+  transition:all 0.25s;
+}
+.map-btn:hover{background:var(--dark);color:#fff;}
+.rsvp-title{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:24px;}
+.rsvp-form{display:flex;flex-direction:column;gap:16px;}
+.field{position:relative;}
+.field input,.field textarea{
+  width:100%;border:none;border-bottom:1px solid var(--light);
+  background:transparent;padding:10px 0;
+  font-family:'Jost',sans-serif;font-size:13px;font-weight:300;
+  color:var(--dark);outline:none;transition:border-color 0.3s;resize:none;
+}
+.field input::placeholder,.field textarea::placeholder{color:transparent;}
+.field input:focus,.field textarea:focus{border-bottom-color:var(--gold);}
+.field-label{
+  position:absolute;top:10px;left:0;
+  font-size:11px;letter-spacing:1px;color:#bbb;
+  transition:all 0.25s;pointer-events:none;
+}
+.field input:focus~.field-label,
+.field input:not([value=""])~.field-label,
+.field textarea:focus~.field-label{
+  top:-10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);
+}
+.attend-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.attend-btn{
+  border:1px solid var(--light);background:transparent;padding:12px 8px;
+  font-family:'Jost',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mid);cursor:pointer;transition:all 0.25s;
+}
+.attend-btn:hover{border-color:var(--dark);color:var(--dark);}
+.attend-btn.active{background:var(--dark);border-color:var(--dark);color:#fff;}
+.attend-btn.decline.active{background:var(--mid);border-color:var(--mid);}
+.meal-title{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);margin-bottom:10px;}
+.meal-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.meal-btn{
+  border:1px solid var(--light);background:transparent;padding:10px 4px;
+  font-family:'Jost',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--mid);cursor:pointer;transition:all 0.25s;text-align:center;
+}
+.meal-btn .mi{display:block;font-size:20px;margin-bottom:4px;}
+.meal-btn:hover{border-color:var(--gold);color:var(--gold);}
+.meal-btn.active{background:var(--cream);border-color:var(--gold);color:var(--gold);}
+.submit-btn{
+  width:100%;background:var(--dark);color:#fff;border:none;
+  padding:15px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  cursor:pointer;transition:background 0.25s;margin-top:4px;
+}
+.submit-btn:hover{background:var(--gold);}
+.success-msg{display:none;text-align:center;padding:24px 0;}
+.success-icon{font-size:32px;color:var(--gold);margin-bottom:12px;}
+.success-msg p{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--dark);font-style:italic;}
+.success-msg small{display:block;font-size:11px;color:var(--mid);margin-top:8px;letter-spacing:0.5px;}
+.card-footer{
+  padding:18px 44px;border-top:1px solid var(--light);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.footer-email{font-size:10px;letter-spacing:1px;color:#ccc;}
+.music-btn{
+  background:none;border:none;cursor:pointer;
+  font-size:18px;color:var(--gold);transition:transform 0.3s;
+}
+.music-btn:hover{transform:scale(1.2);}
+.music-btn.playing{animation:spinNote 3s linear infinite;}
+@keyframes spinNote{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media(max-width:480px){
+  .panel{padding:36px 26px 32px;}
+  .card-footer{padding:16px 26px;}
+}
+</style>
+</head>
+<body>
+<canvas id="petals-canvas"></canvas>
+<div id="envelope-screen">
+  <div style="text-align:center">
+    <svg class="envelope" viewBox="0 0 380 260" xmlns="http://www.w3.org/2000/svg" onclick="openEnvelope()">
+      <rect fill="white" stroke="#e8e2d9" stroke-width="1" x="10" y="60" width="360" height="190" rx="3"/>
+      <polyline points="10,250 145,152" stroke="#e8e2d9" stroke-width="1" fill="none"/>
+      <polyline points="370,250 235,152" stroke="#e8e2d9" stroke-width="1" fill="none"/>
+      <polygon class="env-flap" points="10,60 190,162 370,60 370,60 10,60"/>
+      <circle fill="#b89a6a" cx="190" cy="157" r="26"/>
+      <text fill="white" font-family="Cormorant Garamond, serif" font-size="13" font-style="italic" x="190" y="162" text-anchor="middle">A&amp;S</text>
+      <text fill="#6b6560" font-family="Jost, sans-serif" font-size="8" letter-spacing="3" x="190" y="204" text-anchor="middle">YOU ARE CORDIALLY INVITED</text>
+      <text fill="#1a1814" font-family="Cormorant Garamond, serif" font-size="22" font-style="italic" x="190" y="232" text-anchor="middle">Anoof &amp; Shifa</text>
+    </svg>
+    <p class="open-hint">Tap to open your invitation</p>
+  </div>
+</div>
+<div id="invite">
+<div class="card">
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(0)">Invitation</button>
+    <button class="tab" onclick="switchTab(1)">Schedule</button>
+    <button class="tab" onclick="switchTab(2)">Venue</button>
+    <button class="tab" onclick="switchTab(3)">RSVP</button>
+  </div>
+  <div class="panel active" id="panel-0">
+    <p class="tagline">Together with their families</p>
+    <div class="names">Anoof<span class="amp">&amp;</span>Shifa</div>
+    <div class="divider"><div class="divider-gem"></div></div>
+    <div class="details">
+      <div class="detail-block">
+        <div class="detail-label">Date</div>
+        <div class="detail-value">July 27, 2027</div>
+        <div class="detail-sub">Monday</div>
+      </div>
+      <div class="detail-block">
+        <div class="detail-label">Time</div>
+        <div class="detail-value">4:00 PM</div>
+        <div class="detail-sub">Ceremony begins</div>
+      </div>
+      <div class="detail-block" style="grid-column:1/-1">
+        <div class="detail-label">Venue</div>
+        <div class="detail-value">Barceló Nasandhura</div>
+        <div class="detail-sub">Malé, Maldives</div>
+      </div>
+    </div>
+    <div class="countdown-wrap">
+      <div class="countdown-title">Counting down to the big day</div>
+      <div class="countdown">
+        <div class="count-unit"><div class="count-num" id="cd-days">—</div><div class="count-label">Days</div></div>
+        <div class="count-unit"><div class="count-num" id="cd-hours">—</div><div class="count-label">Hours</div></div>
+        <div class="count-unit"><div class="count-num" id="cd-mins">—</div><div class="count-label">Minutes</div></div>
+        <div class="count-unit"><div class="count-num" id="cd-secs">—</div><div class="count-label">Seconds</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel" id="panel-1">
+    <p class="tagline" style="margin-bottom:20px">Day of celebration</p>
+    <ul class="schedule-list">
+      <li class="schedule-item" onclick="toggleSchedule(this)">
+        <div class="s-time">3:30</div><div class="s-dot"></div>
+        <div class="s-body"><div class="s-title">Guests Arrive</div>
+        <div class="s-desc">Doors open at Barceló Nasandhura. Welcome drinks and soft music await as you find your seats.</div></div>
+      </li>
+      <li class="schedule-item" onclick="toggleSchedule(this)">
+        <div class="s-time">4:00</div><div class="s-dot"></div>
+        <div class="s-body"><div class="s-title">Ceremony Begins</div>
+        <div class="s-desc">The wedding ceremony commences. Please be seated and silence all devices for this sacred moment.</div></div>
+      </li>
+      <li class="schedule-item" onclick="toggleSchedule(this)">
+        <div class="s-time">5:00</div><div class="s-dot"></div>
+        <div class="s-body"><div class="s-title">Cocktail Hour</div>
+        <div class="s-desc">Celebrate with drinks and canapés on the terrace while the couple takes photographs.</div></div>
+      </li>
+      <li class="schedule-item" onclick="toggleSchedule(this)">
+        <div class="s-time">6:30</div><div class="s-dot"></div>
+        <div class="s-body"><div class="s-title">Dinner &amp; Speeches</div>
+        <div class="s-desc">A seated dinner followed by heartfelt toasts from family and close friends.</div></div>
+      </li>
+      <li class="schedule-item" onclick="toggleSchedule(this)">
+        <div class="s-time">8:30</div><div class="s-dot"></div>
+        <div class="s-body"><div class="s-title">Dancing &amp; Celebration</div>
+        <div class="s-desc">The dance floor opens! Join us for an evening of music, laughter, and unforgettable memories.</div></div>
+      </li>
+    </ul>
+  </div>
+  <div class="panel" id="panel-2">
+    <p class="tagline" style="margin-bottom:20px">Find us here</p>
+    <div class="map-box" onclick="window.open('https://maps.google.com/?q=Barcelo+Nasandhura+Male+Maldives','_blank')">
+      <div class="map-grid"></div>
+      <div class="map-pin">
+        <svg width="30" height="38" viewBox="0 0 30 38"><path d="M15 0C6.716 0 0 6.716 0 15c0 9.375 15 23 15 23S30 24.375 30 15C30 6.716 23.284 0 15 0z" fill="#b89a6a"/><circle cx="15" cy="15" r="6" fill="white"/></svg>
+        <div class="map-pin-label">Barceló Nasandhura</div>
+      </div>
+    </div>
+    <div class="venue-card">
+      <div class="venue-name">Barceló Nasandhura</div>
+      <div class="venue-addr">Boduthakurufaanu Magu<br>Malé 20094, Maldives</div>
+    </div>
+    <a class="map-btn" href="https://maps.google.com/?q=Barcelo+Nasandhura+Male+Maldives" target="_blank">Open in Google Maps ↗</a>
+  </div>
+  <div class="panel" id="panel-3">
+    <p class="rsvp-title">Kindly reply by May 27, 2027</p>
+    <div id="rsvp-form" class="rsvp-form">
+      <div class="field">
+        <input type="text" id="guest-name" placeholder=" " oninput="this.setAttribute('value',this.value)"/>
+        <label class="field-label">Your full name</label>
+      </div>
+      <div class="field">
+        <input type="number" id="guest-count" placeholder=" " min="1" max="10" oninput="this.setAttribute('value',this.value)"/>
+        <label class="field-label">Number of guests</label>
+      </div>
+      <div class="attend-row">
+        <button class="attend-btn" id="btn-yes" onclick="selectAttend('yes')">✓ Joyfully accepts</button>
+        <button class="attend-btn decline" id="btn-no" onclick="selectAttend('no')">✕ Regretfully declines</button>
+      </div>
+      <div id="meal-section" style="display:none">
+        <div class="meal-title">Meal preference</div>
+        <div class="meal-row">
+          <button class="meal-btn" onclick="selectMeal(this,'Chicken')"><span class="mi">🍗</span>Chicken</button>
+          <button class="meal-btn" onclick="selectMeal(this,'Fish')"><span class="mi">🐟</span>Fish</button>
+          <button class="meal-btn" onclick="selectMeal(this,'Vegetarian')"><span class="mi">🥗</span>Veg</button>
+        </div>
+      </div>
+      <div class="field">
+        <textarea id="guest-msg" placeholder=" " rows="2"></textarea>
+        <label class="field-label">A message for the couple (optional)</label>
+      </div>
+      <button class="submit-btn" onclick="submitRSVP()">Send Reply</button>
+    </div>
+    <div class="success-msg" id="success-msg">
+      <div class="success-icon" id="s-icon">✦</div>
+      <p id="s-text"></p>
+      <small id="s-sub"></small>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span class="footer-email">anoof9060@gmail.com</span>
+    <button class="music-btn" id="music-btn" onclick="toggleMusic()" title="Ambient music">♪</button>
+  </div>
+</div>
+</div>
+<script>
+const canvas=document.getElementById('petals-canvas');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
+resize();window.addEventListener('resize',resize);
+let petals=[];
+function mkPetal(fromTop){
+  return{x:Math.random()*canvas.width,y:fromTop?-20:Math.random()*canvas.height,
+    sz:Math.random()*7+3,spd:Math.random()*1+0.35,drift:Math.random()*0.5-0.25,
+    rot:Math.random()*360,rs:Math.random()*1.5-0.75,alpha:Math.random()*0.45+0.2,
+    hue:Math.random()>0.5?'#d4b896':'#e8c9a8'};
+}
+for(let i=0;i<28;i++)petals.push(mkPetal(false));
+function animP(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  petals.forEach(p=>{
+    p.y+=p.spd;p.x+=p.drift;p.rot+=p.rs;
+    if(p.y>canvas.height+20)Object.assign(p,mkPetal(true));
+    ctx.save();ctx.globalAlpha=p.alpha;
+    ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
+    ctx.fillStyle=p.hue;
+    ctx.beginPath();ctx.ellipse(0,0,p.sz,p.sz*0.45,0,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+  requestAnimationFrame(animP);
+}
+animP();
+function openEnvelope(){
+  document.getElementById('envelope-screen').classList.add('gone');
+  const inv=document.getElementById('invite');
+  inv.classList.add('visible');
+  for(let i=0;i<50;i++){
+    const p=mkPetal(false);
+    p.x=canvas.width/2+(Math.random()-0.5)*300;
+    p.y=canvas.height*0.4;
+    p.spd=Math.random()*4+1;
+    p.drift=(Math.random()-0.5)*5;
+    p.alpha=0.85;
+    petals.push(p);
+  }
+}
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+}
+const wedding=new Date('2027-07-27T16:00:00');
+function tick(){
+  const diff=wedding-new Date();
+  if(diff<=0)return;
+  const d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),
+        m=Math.floor(diff%3600000/60000),s=Math.floor(diff%60000/1000);
+  [['cd-days',d],['cd-hours',h],['cd-mins',m],['cd-secs',s]].forEach(([id,v])=>{
+    const el=document.getElementById(id),str=String(v).padStart(2,'0');
+    if(el.textContent!==str){
+      el.textContent=str;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
+    }
+  });
+}
+tick();setInterval(tick,1000);
+function toggleSchedule(el){el.classList.toggle('open');}
+let attending=null,meal=null;
+function selectAttend(v){
+  attending=v;
+  document.getElementById('btn-yes').classList.toggle('active',v==='yes');
+  document.getElementById('btn-no').classList.toggle('active',v==='no');
+  document.getElementById('meal-section').style.display=v==='yes'?'block':'none';
+}
+function selectMeal(el,v){
+  meal=v;
+  document.querySelectorAll('.meal-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+function submitRSVP(){
+  const name=document.getElementById('guest-name').value.trim();
+  const guests=document.getElementById('guest-count').value.trim();
+  const msg=document.getElementById('guest-msg').value.trim();
+  if(!name){alert('Please enter your name.');return;}
+  if(!attending){alert('Please select whether you will attend.');return;}
+  document.getElementById('rsvp-form').style.display='none';
+  const suc=document.getElementById('success-msg');suc.style.display='block';
+  if(attending==='yes'){
+    document.getElementById('s-icon').textContent='✦';
+    document.getElementById('s-text').textContent=`We can't wait to celebrate with you, ${name}!`;
+    const pts=[];if(guests)pts.push(`${guests} guest${guests>1?'s':''}`);
+    if(meal)pts.push(meal);pts.push('July 27, 2027');
+    document.getElementById('s-sub').textContent=pts.join(' · ');
+  }else{
+    document.getElementById('s-icon').textContent='♡';
+    document.getElementById('s-text').textContent=`We'll miss you, ${name}.`;
+    document.getElementById('s-sub').textContent='Thank you for letting us know.';
+  }
+  const sub=encodeURIComponent('RSVP – Anoof & Shifa Wedding');
+  const body=encodeURIComponent(`Name: ${name}\nAttending: ${attending==='yes'?'Yes':'No'}`+(guests?`\nGuests: ${guests}`:'')+( meal?`\nMeal: ${meal}`:'' )+(msg?`\nMessage: ${msg}`:''));
+  setTimeout(()=>{window.location.href=`mailto:anoof9060@gmail.com?subject=${sub}&body=${body}`;},900);
+}
+let playing=false;
+const audio=new Audio('https://cdn.pixabay.com/download/audio/2022/08/02/audio_884fe92c21.mp3');
+audio.loop=true;
+const mbtn=document.getElementById('music-btn');
+function toggleMusic(){
+  if(playing){audio.pause();mbtn.classList.remove('playing');mbtn.textContent='♪';}
+  else{audio.play().catch(()=>{});mbtn.classList.add('playing');mbtn.textContent='♫';}
+  playing=!playing;
+}
+</script>
+</body>
+</html>
